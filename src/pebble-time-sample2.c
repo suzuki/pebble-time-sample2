@@ -4,6 +4,8 @@ static Window *window;
 static TextLayer *text_layer;
 static Layer *point_layer;
 static Layer *rect_layer;
+static Layer *image_layer;
+static GBitmap *image;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(text_layer, "Select");
@@ -46,6 +48,10 @@ static void rect_layer_update_callback(Layer *layer, GContext *ctx) {
   );
 }
 
+static void image_layer_update_callback(Layer *layer, GContext *ctx) {
+  graphics_draw_bitmap_in_rect(ctx, image, layer_get_bounds(layer));
+}
+
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -62,6 +68,11 @@ static void window_load(Window *window) {
   rect_layer = layer_create(GRect(0, 0, 144, 168));
   layer_set_update_proc(rect_layer, rect_layer_update_callback);
   layer_add_child(window_layer, rect_layer);
+
+  image = gbitmap_create_with_resource(RESOURCE_ID_ICON_IMAGE);
+  image_layer = layer_create(GRect(0, (168 - 60), 60, 60));
+  layer_set_update_proc(image_layer, image_layer_update_callback);
+  layer_add_child(window_layer, image_layer);
 }
 
 static void window_unload(Window *window) {
@@ -69,6 +80,7 @@ static void window_unload(Window *window) {
 
   layer_destroy(point_layer);
   layer_destroy(rect_layer);
+  layer_destroy(image_layer);
 }
 
 static void init(void) {

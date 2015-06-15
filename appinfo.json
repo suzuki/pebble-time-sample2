@@ -13,6 +13,12 @@
     "dummy": 0
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "png",
+        "name": "ICON_IMAGE",
+        "file": "images/icon.png"
+      }
+    ]
   }
 }
