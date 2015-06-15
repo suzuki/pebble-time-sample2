@@ -2,7 +2,7 @@
 
 static Window *window;
 static TextLayer *text_layer;
-static Layer *antialias_layer;
+static Layer *stroke_layer;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(text_layer, "Select");
@@ -22,10 +22,15 @@ static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
 }
 
-static void antialias_layer_update_callback(Layer *layer, GContext *ctx) {
-  graphics_draw_circle(ctx, GPoint(35, 35), 30);
-  graphics_context_set_antialiased(ctx, false);
-  graphics_draw_circle(ctx, GPoint(110, 35), 30);
+static void stroke_layer_update_callback(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  GPoint center = grect_center_point(&bounds);
+
+  int radius = 5;
+  for (int i = 1; i < 11; i += 2) {
+    graphics_context_set_stroke_width(ctx, i);
+    graphics_draw_circle(ctx, center, radius * i);
+  }
 }
 
 static void window_load(Window *window) {
@@ -37,15 +42,15 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
 
-  antialias_layer = layer_create(bounds);
-  layer_set_update_proc(antialias_layer, antialias_layer_update_callback);
-  layer_add_child(window_layer, antialias_layer);
+  stroke_layer = layer_create(bounds);
+  layer_set_update_proc(stroke_layer, stroke_layer_update_callback);
+  layer_add_child(window_layer, stroke_layer);
 }
 
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
 
-  layer_destroy(antialias_layer);
+  layer_destroy(stroke_layer);
 }
 
 static void init(void) {
