@@ -2,7 +2,6 @@
 
 static Window *window;
 static TextLayer *text_layer;
-static GBitmap *s_bitmap;
 static Layer *s_canvas_layer;
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -24,15 +23,16 @@ static void click_config_provider(void *context) {
 }
 
 static void update_proc(Layer *layer, GContext *ctx) {
-  GRect image_bounds = gbitmap_get_bounds(s_bitmap);
-  GPoint src_ic = grect_center_point(&image_bounds);
+  GRect bounds = layer_get_bounds(layer);
+  GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
 
-  GRect ctx_bounds = layer_get_bounds(layer);
-  GPoint ctx_ic = grect_center_point(&ctx_bounds);
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_circle(ctx, center, 40);
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_circle(ctx, center, 35);
 
-  int angle = (45 * TRIG_MAX_ANGLE) / 360;
-
-  graphics_draw_rotated_bitmap(ctx, s_bitmap, src_ic, angle, ctx_ic);
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(32, 40, 5, 100), 0, GCornerNone);
 }
 
 static void window_load(Window *window) {
@@ -44,7 +44,6 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
 
-  s_bitmap = gbitmap_create_with_resource(RESOURCE_ID_ICON_IMAGE);
   s_canvas_layer = layer_create(GRect(0, 0, 144, 168));
   layer_set_update_proc(s_canvas_layer, update_proc);
   layer_add_child(window_layer, s_canvas_layer);
@@ -53,7 +52,6 @@ static void window_load(Window *window) {
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
 
-  gbitmap_destroy(s_bitmap);
   layer_destroy(s_canvas_layer);
 }
 
